@@ -37,8 +37,11 @@ const listForm = document.querySelector('.list-form')
 
 function createElement(name, element ,appendTo, text){
     let nameText = name;
+    const listItems = document.querySelectorAll('.list-item');
+    // console.log(listItems.length + 1);
+    let idText = nameText + listItems.length;
     name = document.createElement(element);
-    name.setAttribute('id', nameText);
+    name.setAttribute('id', idText);
     name.textContent = text
     appendTo.append(name);
 }
@@ -77,9 +80,12 @@ function createFormElement(name, element, type, appendTo){
     if(type != 'checkbox'){
         itemLabel.textContent = labelTextCapitalized;
     }
+    const listItems = document.querySelectorAll('.list-item');
+    // console.log(listItems.length + 1);
+    let idText = labelText + listItems.length;
     name.setAttribute('name', labelText);
-    name.setAttribute('id', `${labelText}-input`);
-    name.setAttribute('class', labelText);
+    name.setAttribute('class', `${labelText}-input`);
+    name.setAttribute('id', idText);
 
     itemLabel.append(name);
     appendTo.append(itemLabel);
@@ -88,34 +94,30 @@ function createFormElement(name, element, type, appendTo){
 function addToList(i){
     const listOfItems = document.querySelector('ul');
     const newListItem = document.createElement('li');
+    let listNumber = document.querySelectorAll('.list-item').length
     newListItem.classList.add('list-item');
-    // console.log(i);
+    newListItem.setAttribute('id', `li-${listNumber}`)
+    // console.log(listNumber); 
     createFormElement('item-check', 'input', 'checkbox', newListItem );
     createElement('name', 'span', newListItem, i.name);
     createElement('quantity', 'span', newListItem, i.quantity);
     createElement('category', 'span', newListItem, i.category);
-
+    
     listOfItems.append(newListItem);
-
-
-
-
-    let checkbox = document.querySelectorAll('.item-check');
+    
+    let checkbox = document.querySelector(`#item-check${listNumber}`);
+    // console.log(checkbox)
     // console.log(checkbox)
 
-    checkbox.forEach((e) => {
-        e.addEventListener('change', () => {
-            boxChecked(newListItem, e.checked);
-            console.log(e, e.checked)
-        })
+    checkbox.addEventListener('change', (e) => {
+        boxChecked(newListItem, e.target.checked)
     })
-
 }
 
 function boxChecked(listItem, isChecked){
-    console.log(isChecked)
     const spans = listItem.querySelectorAll('span');
     spans.forEach((span) => {
+        console.log(span)
         span.style.transition = 'color 0.3s';
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
@@ -128,7 +130,7 @@ createFormElement('quantity' , 'input', 'number' ,listForm);
 createFormElement('category', 'select', 'text' ,listForm);
 createFormElement('submit', 'button', 'submit', listForm);
 
-let submitButton = listForm.querySelector('#submit-input');
+let submitButton = listForm.querySelector('.submit-input');
 submitButton.addEventListener('click', (e) => {
     e.preventDefault();
     let formData = new FormData(listForm);
