@@ -38,7 +38,7 @@ const listForm = document.querySelector('.list-form')
 function createElement(name, element ,appendTo, text){
     let nameText = name;
     const listItems = document.querySelectorAll('.list-item');
-    // console.log(listItems.length + 1);
+    
     let idText = nameText + listItems.length;
     name = document.createElement(element);
     name.setAttribute('id', idText);
@@ -81,7 +81,7 @@ function createFormElement(name, element, type, appendTo){
         itemLabel.textContent = labelTextCapitalized;
     }
     const listItems = document.querySelectorAll('.list-item');
-    // console.log(listItems.length + 1);
+    
     let idText = labelText + listItems.length;
     name.setAttribute('name', labelText);
     name.setAttribute('class', `${labelText}-input`);
@@ -97,21 +97,30 @@ function addToList(i){
     let listNumber = document.querySelectorAll('.list-item').length
     newListItem.classList.add('list-item');
     newListItem.setAttribute('id', `li-${listNumber}`)
-    // console.log(listNumber); 
+
     createFormElement('item-check', 'input', 'checkbox', newListItem );
     createElement('name', 'span', newListItem, i.name);
     createElement('quantity', 'span', newListItem, i.quantity);
     createElement('category', 'span', newListItem, i.category);
+    createElement('deleteBtn', 'button', newListItem, i.delete)
     
     listOfItems.append(newListItem);
-    
+    const deleteBtn = newListItem.querySelector('button');
+    deleteBtn.classList.add('delete-button');
+    deleteBtn.addEventListener('click', () => {
+        newListItem.remove();
+    })
+
+    newListItem.querySelector('button').textContent = 'x';
     let checkbox = document.querySelector(`#item-check${listNumber}`);
-    // console.log(checkbox)
-    // console.log(checkbox)
 
     checkbox.addEventListener('change', (e) => {
         boxChecked(newListItem, e.target.checked)
     })
+}
+
+function removeFromList(){
+    
 }
 
 function boxChecked(listItem, isChecked){
@@ -129,6 +138,7 @@ createFormElement('name', 'input', 'text' , listForm);
 createFormElement('quantity' , 'input', 'number' ,listForm);
 createFormElement('category', 'select', 'text' ,listForm);
 createFormElement('submit', 'button', 'submit', listForm);
+document.querySelector("#name0").focus();
 
 let submitButton = listForm.querySelector('.submit-input');
 submitButton.addEventListener('click', (e) => {
@@ -141,8 +151,19 @@ submitButton.addEventListener('click', (e) => {
     }
 
     one.addItem(new Item(formDataObject.name, formDataObject.category, formDataObject.quantity))
-    
+    document.querySelector("#name0").focus();
     listForm.reset();
     addToList(formDataObject);
     // console.log(formDataObject);    
+})
+
+function saveBasket(){
+   localStorage.setItem('basketOne', JSON.stringify(one));
+   console.log(JSON.parse(localStorage.getItem("basketOne")))
+}
+saveBasket();
+
+window.addEventListener('storage', (e) => {
+    document.querySelectorAll('ul') = e.key;
+    console.log(e.key);
 })
