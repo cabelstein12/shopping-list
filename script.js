@@ -45,6 +45,7 @@ function createElement(name, element ,appendTo, text){
     name.setAttribute('index', listItems.length);
     name.textContent = text;
     appendTo.append(name);
+    
 }
 
 function createFormElement(name, element, type, appendTo){
@@ -126,21 +127,23 @@ function modifyDom(i){
     })
 }
 
-function removeFromList(){
-    
-}
+// let checkedStatus = localStorage.getItem('checked');
+
 
 function boxChecked(listItem, isChecked){
     const spans = listItem.querySelectorAll('span');
+    console.log(isChecked)
     spans.forEach((span) => {
-        console.log(span)
+        // console.log(span)
         span.style.transition = 'color 0.3s';
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
     })
     listItem.querySelector('button').style.transition = 'opacity 0.3s';
     listItem.querySelector('button').style.opacity = isChecked ? 0.3 : 1.0;
-
+    isChecked = true;
+    localStorage.setItem('checked', isChecked);
+    
 }
 
 
@@ -158,7 +161,7 @@ submitButton.addEventListener('click', (e) => {
 
     for(let [key, value] of formData.entries()){
         formDataObject[key] = value;
-        console.log(key, value)
+        // console.log(key, value)
     }
 
     one.addItem(new Item(formDataObject.name, formDataObject.category, formDataObject.quantity))
@@ -176,13 +179,16 @@ function saveBasket(){
 
 function loadBasket(){
     let getList = JSON.parse(localStorage.getItem('basketOne'));
-    console.log(getList)
-    for(let i = 0 ; i < getList.length; i++){
-        console.log(getList[0].name)
-        modifyDom(getList[i]);
-        one.addItem(new Item(getList[i].name, getList[i].category, getList[i].quantity));
-        saveBasket();
+    // console.log(getList)
+    if(localStorage.length > 0){
+        for(let i = 0 ; i < getList.length; i++){
+            // console.log(getList[0].name)
+            modifyDom(getList[i]);
+            one.addItem(new Item(getList[i].name, getList[i].category, getList[i].quantity));
+            saveBasket();
+        }
     }
 
 }
+
 loadBasket();
