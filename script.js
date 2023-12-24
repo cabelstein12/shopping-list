@@ -12,8 +12,8 @@ class Cart {
         this.basket.push(newItem);
     }
 
-    removeItem(newItem){
-        this.basket = this.basket.filter((item) => newItem !== item);
+    removeItem(selectedItem){
+        this.basket = this.basket.filter((item) => selectedItem !== item);
     }
 }
 
@@ -22,8 +22,8 @@ const one = new Cart();
 class Item {
     constructor(name, category, quantity){
         this.name = name;
-        this.category = category;
         this.quantity = quantity;
+        this.category = category;
     }
 
     changeQuantity(quantity){
@@ -42,7 +42,8 @@ function createElement(name, element ,appendTo, text){
     let idText = nameText + listItems.length;
     name = document.createElement(element);
     name.setAttribute('id', idText);
-    name.textContent = text
+    name.setAttribute('index', listItems.length);
+    name.textContent = text;
     appendTo.append(name);
 }
 
@@ -91,7 +92,7 @@ function createFormElement(name, element, type, appendTo){
     appendTo.append(itemLabel);
 }
 
-function addToList(i){
+function modifyDom(i){
     const listOfItems = document.querySelector('ul');
     const newListItem = document.createElement('li');
     let listNumber = document.querySelectorAll('.list-item').length
@@ -102,15 +103,21 @@ function addToList(i){
     createElement('name', 'span', newListItem, i.name);
     createElement('quantity', 'span', newListItem, i.quantity);
     createElement('category', 'span', newListItem, i.category);
-    createElement('deleteBtn', 'button', newListItem, i.delete)
+    createElement('deleteBtn', 'button', newListItem, i.delete);
+    // console.log(one.basket);
     
     listOfItems.append(newListItem);
+    newListItem.setAttribute('index', listNumber);
+    saveBasket();
+
     const deleteBtn = newListItem.querySelector('button');
     deleteBtn.classList.add('delete-button');
     deleteBtn.addEventListener('click', () => {
         newListItem.remove();
+        one.removeItem(one.basket[listNumber]);
+        // console.log(one.basket);
+        saveBasket()
     })
-
     newListItem.querySelector('button').textContent = 'x';
     let checkbox = document.querySelector(`#item-check${listNumber}`);
 
@@ -131,6 +138,9 @@ function boxChecked(listItem, isChecked){
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
     })
+    listItem.querySelector('button').style.transition = 'opacity 0.3s';
+    listItem.querySelector('button').style.opacity = isChecked ? 0.3 : 1.0;
+
 }
 
 
@@ -148,22 +158,31 @@ submitButton.addEventListener('click', (e) => {
 
     for(let [key, value] of formData.entries()){
         formDataObject[key] = value;
+        console.log(key, value)
     }
 
     one.addItem(new Item(formDataObject.name, formDataObject.category, formDataObject.quantity))
     document.querySelector("#name0").focus();
     listForm.reset();
-    addToList(formDataObject);
+    modifyDom(formDataObject);
+    saveBasket();
     // console.log(formDataObject);    
 })
 
 function saveBasket(){
-   localStorage.setItem('basketOne', JSON.stringify(one));
-   console.log(JSON.parse(localStorage.getItem("basketOne")))
+   localStorage.setItem('basketOne', JSON.stringify(one.basket));
+//    console.log(JSON.parse(localStorage.getItem("basketOne")))
 }
-saveBasket();
 
-window.addEventListener('storage', (e) => {
-    document.querySelectorAll('ul') = e.key;
-    console.log(e.key);
-})
+function loadBasket(){
+    let getList = JSON.parse(localStorage.getItem('basketOne'));
+    console.log(getList)
+    for(let i = 0 ; i < getList.length; i++){
+        console.log(getList[0].name)
+        modifyDom(getList[i]);
+        one.addItem(new Item(getList[i].name, getList[i].category, getList[i].quantity));
+        saveBasket();
+    }
+
+}
+loadBasket();
