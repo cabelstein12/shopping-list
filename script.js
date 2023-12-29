@@ -3,7 +3,8 @@ const input = document.querySelector("#input");
 const itemList = document.querySelector("ul");
 const bodyDiv = document.querySelector('.inputs');
 const itemsDiv = document.querySelector('.items');
-const listForm = document.querySelector('.list-form')
+const listForm = document.querySelector('.list-form');
+let listItem;
 
 class Cart {
     constructor(id){
@@ -53,6 +54,8 @@ function createElement(name, element ,appendTo, text){
     name.setAttribute('index', listItems.length);
     name.textContent = text;
     appendTo.append(name);
+
+
 }
 
 function createFormElement(name, element, type, appendTo){
@@ -90,7 +93,8 @@ function createFormElement(name, element, type, appendTo){
         itemLabel.textContent = labelTextCapitalized;
     }
     const listItems = document.querySelectorAll('.list-item');
-    
+    listItem = listItems.length;
+    console.log(listItems.length)
     let idText = labelText + listItems.length;
     name.setAttribute('name', labelText);
     name.setAttribute('class', `${labelText}-input`);
@@ -100,9 +104,9 @@ function createFormElement(name, element, type, appendTo){
     appendTo.append(itemLabel);
 }
 
-let listNumber = document.querySelectorAll('.list-item').length
 
 function modifyDom(i){
+    let listNumber = document.querySelectorAll('.list-item').length
     const listOfItems = document.querySelector('ul');
     const newListItem = document.createElement('li');
     newListItem.classList.add('list-item');
@@ -121,8 +125,9 @@ function modifyDom(i){
     const deleteBtn = newListItem.querySelector('button');
     deleteBtn.classList.add('delete-button');
     deleteBtn.addEventListener('click', () => {
+        // console.log(localStorage, 'listNum',listNumber,'i:', i)
         newListItem.remove();
-        removeFromCart(selectedCart);
+        removeFromCart(selectedCart, listNumber);
     })
     newListItem.querySelector('button').textContent = 'x';
     let checkbox = document.querySelector(`#item-check${listNumber}`);
@@ -137,10 +142,8 @@ function addToCart(selectedCart, formDataObject){
 
 }
 
-function removeFromCart(selectedCart){
-    selectedCart.removeItem(selectedCart.basket[listNumber])
-console.log(localStorage, one.basket)
-
+function removeFromCart(selectedCart, index){
+    selectedCart.removeItem(selectedCart.basket[index])
     saveBasket(selectedCart)
 }
 
@@ -155,7 +158,7 @@ function boxChecked(listItem, isChecked){
     })
     listItem.querySelector('button').style.transition = 'opacity 0.3s';
     listItem.querySelector('button').style.opacity = isChecked ? 0.3 : 1.0;
-    localStorage.setItem('checked', isChecked);
+    // localStorage.setItem('checked', isChecked);
 }
 
 
@@ -170,10 +173,10 @@ submitButton.addEventListener('click', (e) => {
     e.preventDefault();
 
     let formDataObject = getItemInfo();
-
     addToCart(selectedCart ,formDataObject);
     modifyDom(formDataObject);
-    
+    saveBasket(selectedCart)
+
     document.querySelector("#name0").focus();
     listForm.reset();
 })
@@ -189,6 +192,7 @@ function getItemInfo(){
 
 function saveBasket(selectedCart){
    localStorage.setItem(selectedCart.id, JSON.stringify(selectedCart.basket));
+    console.log('basket saved!', localStorage)
 }
 
 function clearDom(){
@@ -233,6 +237,7 @@ cartElements.forEach((cart) => {
         }
         loadBasket(selectedCart);
         saveBasket(selectedCart);
+        // console.log(localStorage)
     })
 })
 loadBasket(selectedCart);
