@@ -1,23 +1,30 @@
 const addBtn = document.querySelector("#addBtn");
 const input = document.querySelector("#input");
 const itemList = document.querySelector("ul");
-
+const bodyDiv = document.querySelector('.inputs');
+const itemsDiv = document.querySelector('.items');
+const listForm = document.querySelector('.list-form')
 
 class Cart {
-    constructor(){
+    constructor(id){
         this.basket = [];
+        this.id = id;
     }
-
+    
     addItem(newItem){
         this.basket.push(newItem);
     }
-
+    
     removeItem(selectedItem){
         this.basket = this.basket.filter((item) => selectedItem !== item);
     }
 }
 
-const one = new Cart();
+const one = new Cart('cartOne');
+const two = new Cart('cartTwo');
+const three = new Cart('cartThree');
+let selectedCart = one;
+
 
 class Item {
     constructor(name, category, quantity){
@@ -31,9 +38,10 @@ class Item {
     }
 }
 
-const bodyDiv = document.querySelector('.inputs');
-const itemsDiv = document.querySelector('.items');
-const listForm = document.querySelector('.list-form')
+let cartOne = document.getElementById('cart-one');
+let cartTwo = document.getElementById('cart-two');
+let cartThree = document.getElementById('cart-three');
+const cartElements = [cartOne, cartTwo, cartThree];
 
 function createElement(name, element ,appendTo, text){
     let nameText = name;
@@ -45,7 +53,6 @@ function createElement(name, element ,appendTo, text){
     name.setAttribute('index', listItems.length);
     name.textContent = text;
     appendTo.append(name);
-    
 }
 
 function createFormElement(name, element, type, appendTo){
@@ -93,10 +100,11 @@ function createFormElement(name, element, type, appendTo){
     appendTo.append(itemLabel);
 }
 
+let listNumber = document.querySelectorAll('.list-item').length
+
 function modifyDom(i){
     const listOfItems = document.querySelector('ul');
     const newListItem = document.createElement('li');
-    let listNumber = document.querySelectorAll('.list-item').length
     newListItem.classList.add('list-item');
     newListItem.setAttribute('id', `li-${listNumber}`)
 
@@ -105,19 +113,16 @@ function modifyDom(i){
     createElement('quantity', 'span', newListItem, i.quantity);
     createElement('category', 'span', newListItem, i.category);
     createElement('deleteBtn', 'button', newListItem, i.delete);
-    // console.log(one.basket);
+
     
     listOfItems.append(newListItem);
     newListItem.setAttribute('index', listNumber);
-    saveBasket();
 
     const deleteBtn = newListItem.querySelector('button');
     deleteBtn.classList.add('delete-button');
     deleteBtn.addEventListener('click', () => {
         newListItem.remove();
-        one.removeItem(one.basket[listNumber]);
-        // console.log(one.basket);
-        saveBasket()
+        removeFromCart(selectedCart);
     })
     newListItem.querySelector('button').textContent = 'x';
     let checkbox = document.querySelector(`#item-check${listNumber}`);
@@ -127,23 +132,30 @@ function modifyDom(i){
     })
 }
 
-// let checkedStatus = localStorage.getItem('checked');
+function addToCart(selectedCart, formDataObject){
+   return selectedCart.addItem(new Item(formDataObject.name, formDataObject.category, formDataObject.quantity));
+
+}
+
+function removeFromCart(selectedCart){
+    selectedCart.removeItem(selectedCart.basket[listNumber])
+console.log(localStorage, one.basket)
+
+    saveBasket(selectedCart)
+}
 
 
 function boxChecked(listItem, isChecked){
     const spans = listItem.querySelectorAll('span');
     console.log(isChecked)
     spans.forEach((span) => {
-        // console.log(span)
         span.style.transition = 'color 0.3s';
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
     })
     listItem.querySelector('button').style.transition = 'opacity 0.3s';
     listItem.querySelector('button').style.opacity = isChecked ? 0.3 : 1.0;
-    isChecked = true;
     localStorage.setItem('checked', isChecked);
-    
 }
 
 
@@ -156,39 +168,72 @@ document.querySelector("#name0").focus();
 let submitButton = listForm.querySelector('.submit-input');
 submitButton.addEventListener('click', (e) => {
     e.preventDefault();
-    let formData = new FormData(listForm);
-    let formDataObject = {};
 
-    for(let [key, value] of formData.entries()){
-        formDataObject[key] = value;
-        // console.log(key, value)
-    }
+    let formDataObject = getItemInfo();
 
-    one.addItem(new Item(formDataObject.name, formDataObject.category, formDataObject.quantity))
+    addToCart(selectedCart ,formDataObject);
+    modifyDom(formDataObject);
+    
     document.querySelector("#name0").focus();
     listForm.reset();
-    modifyDom(formDataObject);
-    saveBasket();
-    // console.log(formDataObject);    
 })
 
-function saveBasket(){
-   localStorage.setItem('basketOne', JSON.stringify(one.basket));
-//    console.log(JSON.parse(localStorage.getItem("basketOne")))
+function getItemInfo(){
+    let formData = new FormData(listForm);
+    let formDataObject = {};
+    for(let [key, value] of formData.entries()){
+        formDataObject[key] = value;
+    }
+    return formDataObject
 }
 
-function loadBasket(){
-    let getList = JSON.parse(localStorage.getItem('basketOne'));
-    // console.log(getList)
-    if(localStorage.length > 0){
+function saveBasket(selectedCart){
+   localStorage.setItem(selectedCart.id, JSON.stringify(selectedCart.basket));
+}
+
+function clearDom(){
+    document.querySelectorAll('.list-item').forEach(e => e.remove())
+}
+function loadBasket(selectedCart){
+    let getList = JSON.parse(localStorage.getItem(selectedCart.id));
+
+    if(getList && localStorage.length > 0){
+        let item ;
+        clearDom()
         for(let i = 0 ; i < getList.length; i++){
-            // console.log(getList[0].name)
-            modifyDom(getList[i]);
-            one.addItem(new Item(getList[i].name, getList[i].category, getList[i].quantity));
-            saveBasket();
+            item = new Item(getList[i].name, getList[i].category, getList[i].quantity);
+
+            modifyDom(item);
+            if(selectedCart.basket.length != getList.length){
+                selectedCart.addItem(item);
+            }
         }
     }
-
 }
 
-loadBasket();
+
+cartElements.forEach((cart) => {
+    cart.addEventListener('click', (e) => {
+        e.target.style.color = 'blue';
+        if(e.target == cartOne){
+            console.log('one')
+            cartTwo.style.color = 'black';
+            cartThree.style.color = 'black';
+            selectedCart = one;
+        } else if(e.target == cartTwo){
+            console.log('two')
+            cartOne.style.color = 'black';
+            cartThree.style.color = 'black';
+            selectedCart = two
+        } else if(e.target == cartThree){
+            console.log('three')
+            cartOne.style.color = 'black';
+            cartTwo.style.color = 'black';
+            selectedCart = three
+        }
+        loadBasket(selectedCart);
+        saveBasket(selectedCart);
+    })
+})
+loadBasket(selectedCart);
+cartOne.style.color = 'blue';
