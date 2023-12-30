@@ -77,7 +77,6 @@ function createFormElement(name, element, type, appendTo){
         };
         
         for(category in categories){
-            // console.log(Object.values(categories));
             name.options[name.options.length] = new Option(categories[category], category);
         }
     }
@@ -94,7 +93,6 @@ function createFormElement(name, element, type, appendTo){
     }
     const listItems = document.querySelectorAll('.list-item');
     listItem = listItems.length;
-    // console.log(listItems.length)
     let idText = labelText + listItems.length;
     name.setAttribute('name', labelText);
     name.setAttribute('class', `${labelText}-input`);
@@ -125,7 +123,6 @@ function modifyDom(i){
     const deleteBtn = newListItem.querySelector('button');
     deleteBtn.classList.add('delete-button');
     deleteBtn.addEventListener('click', () => {
-        // console.log(localStorage, 'listNum',listNumber,'i:', i)
         // newListItem.remove();
         removeFromCart(selectedCart, listNumber);
         clearDom()
@@ -153,7 +150,6 @@ function removeFromCart(selectedCart, index){
 function boxChecked(listItem, isChecked, selectedCart){
     const spans = listItem.querySelectorAll('span');
     spans.forEach((span) => {
-        // console.log(span)
         span.style.transition = 'color 0.3s';
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
@@ -164,9 +160,6 @@ function boxChecked(listItem, isChecked, selectedCart){
     const listNumber = listItem.getAttribute('index');
     const checkboxKey = `${selectedCart.id}-checkbox-${listNumber}`;
     localStorage.setItem(checkboxKey, isChecked)
-    
-    // console.log(listNumber)
-    // localStorage.setItem( selectedCart.id, JSON.stringify(listItem));
 }
 
 
@@ -214,7 +207,6 @@ function getItemInfo(){
 
 function saveBasket(selectedCart){
    localStorage.setItem(selectedCart.id, JSON.stringify(selectedCart.basket));
-    console.log('basket saved!', localStorage)
 }
 
 function clearDom(){
@@ -243,24 +235,20 @@ cartElements.forEach((cart) => {
     cart.addEventListener('click', (e) => {
         e.target.style.color = 'blue';
         if(e.target == cartOne){
-            console.log('one')
             cartTwo.style.color = 'black';
             cartThree.style.color = 'black';
             selectedCart = one;
         } else if(e.target == cartTwo){
-            console.log('two')
             cartOne.style.color = 'black';
             cartThree.style.color = 'black';
             selectedCart = two
         } else if(e.target == cartThree){
-            console.log('three')
             cartOne.style.color = 'black';
             cartTwo.style.color = 'black';
             selectedCart = three
         }
         loadBasket(selectedCart);
         saveBasket(selectedCart);
-        // console.log(localStorage)
     })
 })
 loadBasket(selectedCart);
