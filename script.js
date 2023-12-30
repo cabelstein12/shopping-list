@@ -94,7 +94,7 @@ function createFormElement(name, element, type, appendTo){
     }
     const listItems = document.querySelectorAll('.list-item');
     listItem = listItems.length;
-    console.log(listItems.length)
+    // console.log(listItems.length)
     let idText = labelText + listItems.length;
     name.setAttribute('name', labelText);
     name.setAttribute('class', `${labelText}-input`);
@@ -126,14 +126,16 @@ function modifyDom(i){
     deleteBtn.classList.add('delete-button');
     deleteBtn.addEventListener('click', () => {
         // console.log(localStorage, 'listNum',listNumber,'i:', i)
-        newListItem.remove();
+        // newListItem.remove();
         removeFromCart(selectedCart, listNumber);
+        clearDom()
+        loadBasket(selectedCart)
     })
     newListItem.querySelector('button').textContent = 'x';
     let checkbox = document.querySelector(`#item-check${listNumber}`);
 
     checkbox.addEventListener('change', (e) => {
-        boxChecked(newListItem, e.target.checked)
+        boxChecked(newListItem, e.target.checked, selectedCart)
     })
 }
 
@@ -148,17 +150,23 @@ function removeFromCart(selectedCart, index){
 }
 
 
-function boxChecked(listItem, isChecked){
+function boxChecked(listItem, isChecked, selectedCart){
     const spans = listItem.querySelectorAll('span');
-    console.log(isChecked)
     spans.forEach((span) => {
+        // console.log(span)
         span.style.transition = 'color 0.3s';
         span.style.color = isChecked ? 'lightgrey' : 'black';
         span.style.textDecoration = isChecked ? 'line-through' : 'none';
     })
     listItem.querySelector('button').style.transition = 'opacity 0.3s';
     listItem.querySelector('button').style.opacity = isChecked ? 0.3 : 1.0;
-    // localStorage.setItem('checked', isChecked);
+
+    const listNumber = listItem.getAttribute('index');
+    const checkboxKey = `${selectedCart.id}-checkbox-${listNumber}`;
+    localStorage.setItem(checkboxKey, isChecked)
+    
+    // console.log(listNumber)
+    // localStorage.setItem( selectedCart.id, JSON.stringify(listItem));
 }
 
 
@@ -180,6 +188,20 @@ submitButton.addEventListener('click', (e) => {
     document.querySelector("#name0").focus();
     listForm.reset();
 })
+
+function loadCheckboxStates(selectedCart){
+    document.querySelectorAll('.list-item').forEach((listItem) => {
+        const listNumber = listItem.getAttribute('index');
+        const checkboxKey = `${selectedCart.id}-checkbox-${listNumber}`;
+        const isChecked = localStorage.getItem(checkboxKey) === 'true';
+
+        const checkbox = listItem.querySelector('input[type="checkbox"]');
+        if(checkbox){
+            checkbox.checked  = isChecked;
+            boxChecked(listItem, isChecked, selectedCart)
+        }
+    })
+}
 
 function getItemInfo(){
     let formData = new FormData(listForm);
@@ -212,6 +234,7 @@ function loadBasket(selectedCart){
                 selectedCart.addItem(item);
             }
         }
+        loadCheckboxStates(selectedCart);
     }
 }
 
